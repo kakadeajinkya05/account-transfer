@@ -15,6 +15,6 @@ All amounts are BigDecimals, so you can safely pass any numbers there
 ## Running 
 
 ```bash
-./gradlew clen build
+./gradlew clean build
 java -jar build/libs/account-transfer-0.1-all.jar
 ```
