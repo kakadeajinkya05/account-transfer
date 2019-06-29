@@ -1,14 +1,16 @@
 package com.revolut.controller;
 
+import static io.micronaut.http.HttpStatus.BAD_REQUEST;
 import static io.micronaut.http.HttpStatus.OK;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 import com.revolut.domain.Account;
-import com.revolut.domain.ResponseType;
 import com.revolut.domain.Transfer;
 import io.micronaut.http.HttpResponse;
+import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.micronaut.test.annotation.MicronautTest;
 import java.math.BigDecimal;
 import javax.inject.Inject;
@@ -76,12 +78,13 @@ public class TransferAccountControllerTest {
         .toAccount(secondUserAccount.getAccountNumber()).amount(new BigDecimal(200.00)).build();
 
     // Actual Call
-    HttpResponse response = accountClient.doTransfer(accountTransfer);
-    ResponseType accountResponseWireType = (ResponseType) response.getBody(ResponseType.class).orElse(null);
-
-    // Assert
-    assertThat(response.getStatus(), is(OK));
-    assertThat(accountResponseWireType.getMessage(), is(INSUFFICIENT_BALANCE));
+    try {
+      HttpResponse response = accountClient.doTransfer(accountTransfer);
+    } catch (HttpClientResponseException ex) {
+      // Assert
+      assertThat(ex.getStatus(), is(BAD_REQUEST));
+      assertThat(ex.getMessage(), containsString(INSUFFICIENT_BALANCE));
+    }
   }
 
   @Test
@@ -91,12 +94,13 @@ public class TransferAccountControllerTest {
         .toAccount(firstUserAccount.getAccountNumber()).amount(new BigDecimal(100.00)).build();
 
     // Actual Call
-    HttpResponse response = accountClient.doTransfer(accountTransfer);
-    ResponseType accountResponseWireType = (ResponseType) response.getBody(ResponseType.class).orElse(null);
-
-    // Assert
-    assertThat(response.getStatus(), is(OK));
-    assertThat(accountResponseWireType.getMessage(), is(SAME_ACCOUNT_NUMBER));
+    try {
+      HttpResponse response = accountClient.doTransfer(accountTransfer);
+    } catch (HttpClientResponseException ex) {
+      // Assert
+      assertThat(ex.getStatus(), is(BAD_REQUEST));
+      assertThat(ex.getMessage(), containsString(SAME_ACCOUNT_NUMBER));
+    }
   }
 
   @Test
@@ -106,12 +110,13 @@ public class TransferAccountControllerTest {
         .toAccount(secondUserAccount.getAccountNumber()).amount(new BigDecimal(0.00)).build();
 
     // Actual Call
-    HttpResponse response = accountClient.doTransfer(accountTransfer);
-    ResponseType accountResponseWireType = (ResponseType) response.getBody(ResponseType.class).orElse(null);
-
-    // Assert
-    assertThat(response.getStatus(), is(OK));
-    assertThat(accountResponseWireType.getMessage(), is(INVALID_AMOUNT));
+    try {
+      HttpResponse response = accountClient.doTransfer(accountTransfer);
+    } catch (HttpClientResponseException ex) {
+      // Assert
+      assertThat(ex.getStatus(), is(BAD_REQUEST));
+      assertThat(ex.getMessage(), containsString(INVALID_AMOUNT));
+    }
   }
 
   @Test
@@ -120,13 +125,14 @@ public class TransferAccountControllerTest {
     accountTransfer = Transfer.builder().fromAccount(firstUserAccount.getAccountNumber())
         .toAccount(secondUserAccount.getAccountNumber()).amount(new BigDecimal(-0.00)).build();
 
-    // Actual Call
-    HttpResponse response = accountClient.doTransfer(accountTransfer);
-    ResponseType accountResponseWireType = (ResponseType) response.getBody(ResponseType.class).orElse(null);
-
-    // Assert
-    assertThat(response.getStatus(), is(OK));
-    assertThat(accountResponseWireType.getMessage(), is(INVALID_AMOUNT));
+    try {
+      // Actual Call
+      HttpResponse response = accountClient.doTransfer(accountTransfer);
+    } catch (HttpClientResponseException ex) {
+      // Assert
+      assertThat(ex.getStatus(), is(BAD_REQUEST));
+      assertThat(ex.getMessage(), containsString(INVALID_AMOUNT));
+    }
   }
 
   @Test
@@ -136,12 +142,13 @@ public class TransferAccountControllerTest {
         .amount(new BigDecimal(10.00)).build();
 
     // Actual Call
-    HttpResponse response = accountClient.doTransfer(accountTransfer);
-    ResponseType accountResponseWireType = (ResponseType) response.getBody(ResponseType.class).orElse(null);
-
-    // Assert
-    assertThat(response.getStatus(), is(OK));
-    assertThat(accountResponseWireType.getMessage(), is(INVALID_ACCOUNT_NUMBER));
+    try {
+      HttpResponse response = accountClient.doTransfer(accountTransfer);
+    } catch (HttpClientResponseException ex) {
+      // Assert
+      assertThat(ex.getStatus(), is(BAD_REQUEST));
+      assertThat(ex.getMessage(), containsString(INVALID_ACCOUNT_NUMBER));
+    }
   }
 
 

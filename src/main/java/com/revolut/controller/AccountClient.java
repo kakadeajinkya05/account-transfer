@@ -12,12 +12,12 @@ import javax.validation.constraints.NotNull;
 public interface AccountClient {
 
   @Post("/add")
-  public HttpResponse addAccount(@Body @Valid Account account);
+  HttpResponse addAccount(@Body @Valid Account account);
 
   @Get("/{accountId}")
-  public HttpResponse getAccount(@Body @NotNull Long accountId);
+  HttpResponse getAccount(@Body @NotNull Long accountId);
 
   @Post("/transfer")
-  public HttpResponse doTransfer(@Body @Valid Transfer transfer);
+  HttpResponse doTransfer(@Body @Valid Transfer transfer);
 
 }

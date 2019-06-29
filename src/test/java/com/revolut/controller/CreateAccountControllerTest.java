@@ -1,14 +1,15 @@
 package com.revolut.controller;
 
+import static io.micronaut.http.HttpStatus.BAD_REQUEST;
 import static io.micronaut.http.HttpStatus.CREATED;
-import static io.micronaut.http.HttpStatus.OK;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 import com.revolut.domain.Account;
-import com.revolut.domain.ResponseType;
 import io.micronaut.http.HttpResponse;
+import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.micronaut.test.annotation.MicronautTest;
 import java.math.BigDecimal;
 import javax.inject.Inject;
@@ -76,12 +77,14 @@ public class CreateAccountControllerTest {
     assertNotNull(account);
     assertThat(account.getAccountNumber(), is(firstUserAccount.getAccountNumber()));
 
-    // Actual Call
-    response = accountClient.addAccount(firstUserAccount);
-    ResponseType accountResponseWireType = (ResponseType) response.getBody(ResponseType.class).orElse(null);
-    // Assert
-    assertThat(response.getStatus(), is(OK));
-    assertThat(accountResponseWireType.getMessage(), is(ACCOUNT_NUMBER_EXISTS));
+    try {
+      // Actual Call
+      response = accountClient.addAccount(firstUserAccount);
+    } catch (HttpClientResponseException error) {
+      assertThat(error.getResponse().getStatus(), is(BAD_REQUEST));
+      assertThat(error.getMessage(), containsString(ACCOUNT_NUMBER_EXISTS));
+    }
+
   }
 
   @AfterEach
